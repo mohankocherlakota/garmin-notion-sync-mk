@@ -204,7 +204,10 @@ class Garmin:
             unavailable.append('workouts')
         if not values:
             raise SyncError('No usable Garmin measurements returned; Notion untouched')
+        print('Read date: ' + day)
         print('Garmin actual data: passed; unavailable groups: ' + ', '.join(unavailable))
+        print('Fields available: ' + ', '.join(sorted(values)))
+        print('Fields unavailable: ' + ', '.join(sorted(REQUIRED - values.keys())))
         return values
 
 

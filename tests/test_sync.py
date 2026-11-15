@@ -10,6 +10,12 @@ TODAY = '2026-11-14'
 
 
 class MappingTests(unittest.TestCase):
+    def test_official_token_is_plain_text_jwt(self):
+        with patch('sync.request', return_value='header.payload.signature') as request:
+            client = sync.Garmin('SYNTHETIC_KEY')
+        self.assertEqual(client.headers, {'Authorization': 'Bearer header.payload.signature'})
+        self.assertTrue(request.call_args.kwargs['text_response'])
+
     def test_official_v2_nested_fields_and_units(self):
         row = {'movement': {'steps': {'value': 7123, 'distanceInMeters': 4200}},
                'calories': {'burnedActive': 321}, 'intensityMinutes': {'moderate': 0, 'vigorous': 12},

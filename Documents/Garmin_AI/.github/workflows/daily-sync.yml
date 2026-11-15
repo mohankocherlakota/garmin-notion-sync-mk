@@ -1,0 +1,46 @@
+name: Garmin to Notion daily sync
+on:
+  push:
+    branches: [main]
+    paths: ['sync.py', '.github/workflows/daily-sync.yml']
+  schedule:
+    - cron: '17 8 * * *'
+      timezone: America/New_York
+  workflow_dispatch:
+    inputs:
+      dates:
+        description: 'Comma-separated dates; blank retries the previous three New York dates'
+        type: string
+        default: '2026-11-13,2026-11-14,2026-11-12'
+      write:
+        description: 'Write to Notion after read-only validation'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: garmin-notion-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate and synchronize
+        env:
+          GARMIN_API_KEY: ${{ secrets.GARMIN_API_KEY }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DATES: ${{ inputs.dates }}
+          WRITE: ${{ github.event_name == 'schedule' || inputs.write }}
+        run: |
+          args=(--dates "$DATES")
+          if [ "$WRITE" = "true" ]; then args+=(--write); fi
+          python sync.py "${args[@]}"

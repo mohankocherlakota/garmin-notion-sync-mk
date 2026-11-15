@@ -61,6 +61,12 @@ Tests use synthetic data and cover nested API fields, unit conversions, UTC roll
 
 Logs include credential-presence errors, field names, availability, dates, and verification outcomes, never token values, measurement values, workout names, raw API responses, or Notion page content. This repository is public: never upload live health fixtures or debug response bodies as artifacts. Unexpected exceptions are sanitized.
 
-## Initial verification status
+## Live verification — November 14, 2026 (America/New_York)
 
-The repository was initially empty. The connected Notion tool could read the existing tracker schema, but this does not establish access for a separate Actions integration token. Live Garmin authentication, Actions secret presence, Notion writes, and restored dates must be verified from a live workflow and Notion readback; local regression tests alone do not establish those outcomes.
+Both required repository secret names were confirmed without displaying values. Official Garmin authentication and actual data retrieval passed. A read-only workflow validated the existing Notion database and schema before the controlled write.
+
+[The first live write](https://github.com/mohankocherlakota/garmin-notion-sync-mk/actions/runs/43657676252) passed property-by-property readback and date uniqueness checks for November 13, November 14, and November 12. An independent read through the existing Notion connection confirmed one row per date with every required daily metric present: November 12 and 13 were `Complete`, and November 14 was `Sync Pending`. Garmin returned workout details for all three dates. Weight and BMI were not supplied by Garmin for these dates and existing entries were preserved. November 9 was not included in any sync.
+
+[A second live write](https://github.com/mohankocherlakota/garmin-notion-sync-mk/actions/runs/43657733331) also passed. The independent Notion query returned the same three page IDs afterward, with exactly one record per date and unchanged completion states.
+
+The daily workflow is active and scheduled for 08:17 America/New_York. Seventeen synthetic regression tests passed locally and in GitHub Actions. No Garmin account password, credentials, or live health measurements were committed.

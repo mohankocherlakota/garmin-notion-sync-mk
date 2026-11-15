@@ -310,7 +310,7 @@ def main():
     parser.add_argument('--dates', default='')
     parser.add_argument('--write', action='store_true')
     args = parser.parse_args()
-    required = ['GARMIN_API_KEY', 'NOTION_TOKEN']
+    required = ['GARMIN_API_KEY']
     missing = [k for k in required if not os.environ.get(k)]
     if missing:
         raise SyncError('Missing repository secrets: ' + ', '.join(missing))
@@ -321,9 +321,12 @@ def main():
     for day in dates:
         if str(date.fromisoformat(day)) != day or date.fromisoformat(day) > today or day in PROTECTED:
             raise SyncError('Invalid, future, or protected date; no writes performed')
-    garmin, notion = Garmin(os.environ['GARMIN_API_KEY']), Notion(os.environ['NOTION_TOKEN'])
+    garmin = Garmin(os.environ['GARMIN_API_KEY'])
     # Read all requested dates before the first mutation.
     collected = [(day, garmin.collect(day)) for day in dates]
+    if not os.environ.get('NOTION_TOKEN'):
+        raise SyncError('Garmin read checks finished; missing repository secret: NOTION_TOKEN. Notion untouched')
+    notion = Notion(os.environ['NOTION_TOKEN'])
     for day, values in collected:
         notion.sync(day, values, write=False)
     if args.write:
